@@ -1,0 +1,10 @@
+# Ignorar reportes generados
+reports/*.log
+audit_permisos_*.log
+
+# Ignorar archivos temporales
+*.tmp
+.DS_Store
+
+# Ignorar entorno de VS Code
+.vscode/
