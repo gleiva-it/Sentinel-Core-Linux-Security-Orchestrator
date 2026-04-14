@@ -1,88 +1,125 @@
-Sentinel-Core is a modular, high-performance security auditing and threat-hunting tool developed for Linux environments. Built with an SRE mindset, it bridges the gap between manual system hardening and automated security monitoring.
+# 🛡️ Sentinel-Core: Advanced Linux Security Orchestrator
 
-Unlike monolithic scripts, Sentinel-Core uses a decoupled architecture to provide real-time insights into system integrity, suspicious log patterns, and advanced process anomalies (including fileless malware detection).
-🚀 Key Features
+<p align="center">
+  <img src="https://img.shields.io/badge/Bash-4E9A06?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash">
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
+  <img src="https://img.shields.io/badge/Security-Blue_Team-0055ff?style=for-the-badge" alt="Security">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT">
+</p>
 
-    Modular Architecture: Decoupled logic (Logger, Scanner, Monitor) for high maintainability and scalability.
+**Sentinel-Core** is a modular, high-performance security auditing and threat-hunting tool developed for Linux environments. Built with an **SRE mindset**, it bridges the gap between manual system hardening and automated security monitoring.
 
-    Threat Hunting (Live): Real-time process monitoring with a focus on Fileless Malware detection (via /proc/$PID/exe verification) and suspicious path execution (/tmp, /dev/shm).
+---
 
-    SRE & Big Data Ready: Native JSON export support for seamless integration with ELK Stack, Splunk, or custom Grafana dashboards.
+## 🚀 Key Features
 
-    Intelligent Log Auditing: High-speed RegEx engine to detect brute-force attacks, SSH anomalies, and terminal injection attempts.
+* **🧱 Modular Architecture:** Fully decoupled modules for high maintainability.
+* **🎯 Threat Hunting:** Focus on **Fileless Malware detection** via `/proc/$PID/exe`.
+* **📊 SRE Ready:** Native **JSON export** for ELK Stack or Splunk integration.
+* **🔍 Intelligent Logging:** RegEx-powered engine to detect brute-force and injections.
+* **🛡️ Zero-Trust Audit:** Deep-scan of SUID/SGID and critical FHS permissions.
 
-    Zero-Trust Permission Audit: Deep-scan of SUID/SGID binaries and world-writable configuration files to prevent privilege escalation.
+---
 
-    Fingerprinting: Unique system ID generation for asset tracking in distributed environments.
+## ⚙️ Component Architecture
 
-🛠️ Architecture & Tech Stack
+Este diagrama representa la orquestación de datos y la comunicación entre módulos.
 
-    Language: Bash (Gnu Coreutils)
+```mermaid
+graph TD
+    %% Estilos
+    classDef main fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4;
+    classDef module fill:#313244,stroke:#94e2d5,stroke-width:2px,color:#cdd6f4;
+    classDef input fill:#1e1e2e,stroke:#f38ba8,stroke-width:1px,color:#cdd6f4,stroke-dasharray: 5 5;
+    classDef output fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4;
 
-    Logic: Modular shell scripting with external configuration management.
+    subgraph SentinelCore ["Orchestrator"]
+        Main("main.sh - Entrypoint")
+        Config("sentinel.conf - Config")
+        Utils("utils.sh - Lib")
+    end
+    
+    subgraph Modules ["Specialized Modules"]
+        Logger("logger.sh - Logs")
+        Monitor("monitor.sh - Process")
+        Scanner("scanner.sh - Audit")
+    end
+    
+    subgraph SystemInputs ["System Input"]
+        Logs[/"auth.log" /]
+        Procs[/"Process Table" /]
+        FS[/"Filesystem" /]
+    end
 
-    Data Handling: jq for structured JSON output.
+    Main --> Config
+    Main --> Utils
+    Main ==> Logger
+    Main ==> Monitor
+    Main ==> Scanner
+    
+    Logs -.-> Logger
+    Procs -.-> Monitor
+    FS -.-> Scanner
 
-    Security Focus: FHS compliance, Unix permissions integrity, and process signal management (SIGSTOP/SIGKILL).
+    Logger --> Reports("📁 reports/ Audit Logs")
+    Scanner --> Reports
+    Monitor --> LiveUI["🖥️ Live Dashboard"]
 
-sentinel/
-├── main.sh                # Main Orchestrator & CLI Entry point
-├── sentinel.conf          # External Configuration (No Hardcoding)
-├── lib/
-│   └── globals.sh         # Environment variables & Global UI
-├── modules/
-│   ├── logger.sh          # Log Analysis & RegEx Engine
-│   ├── scanner.sh         # File System & Permission Integrity
-│   ├── monitor.sh         # Process Tracking & Signal Management
-│   └── utils.sh           # Helper functions & JSON Logger
-└── reports/               # Automated audit logging
+    class Main,Config,Utils main;
+    class Logger,Monitor,Scanner module;
+    class Logs,Procs,FS input;
+    class Reports,LiveUI output;
+```
 
 💻 Installation & Usage
-Prerequisites
+⚙️ Prerequisites
 
-    A Linux distribution (Tested on Arch Linux and AlmaLinux 9).
+    OS: Arch Linux / AlmaLinux 9 / Debian 12.
 
-    Root privileges (sudo).
+    Privileges: Root access (sudo) is required.
 
-    jq (Required for JSON mode).
+    Dependencies: jq (for JSON output).
 
-Quick Start
-Bash
+🚀 Quick Start
 
-# Clone the repository
-git clone https://github.com/gleiva/sentinel-core.git
-cd sentinel-core
+    Clone & Access:
+    Bash
 
-# Grant execution permissions
-chmod +x main.sh
+    git clone (https://github.com/gleiva-it/Sentinel-Core-Linux-Security-Orchestrator.git)
+    cd Sentinel-Core-Linux-Security-Orchestrator
 
-# Run the interactive dashboard
-sudo ./main.sh
+    Permissions:
+    Bash
 
-# Run in JSON mode for data pipelines
-sudo ./main.sh --json
+    chmod +x main.sh lib/globals.sh modules/*.sh
+
+    Execution:
+    Bash
+
+    # Standard Mode
+    sudo ./main.sh
+
+    # Pipeline Mode (JSON)
+    sudo ./main.sh --json
 
 🛡️ Why Sentinel-Core?
 
-This tool was developed to address the need for a lightweight, dependency-minimal security auditor that follows professional DevOps/SRE standards:
+    Portability: Zero hardcoded paths; everything is in sentinel.conf.
 
-    Portability: Uses an external .conf file to avoid hardcoded paths.
+    Observability: Converts system noise into structured, actionable data.
 
-    Observability: Transforms raw system noise into structured data.
-
-    Response: Not just a scanner—Sentinel-Core allows for immediate incident response by managing process signals directly from the monitor.
-
+    Active Response: Includes surgical tools to manage process signals (SIGSTOP, SIGKILL) during live monitoring.
 
 👤 Author
 
 Gonzalo Leiva
 
-    Engineering Student @ Universidad de Montevideo (UM).
+    🎓 Computer Science Student @ Universidad de Montevideo (UM).
 
-    Specialization: Cybersecurity (Blue Team), SRE, and Infrastructure as Code.
+    🛡️ Focus: Cybersecurity (Blue Team) & SRE.
 
-    Current Focus: Building high-performance concurrent tools in Go and advanced Linux hardening.
+    🛠️ Tech: Bash, Go, Python, Linux Hardening.
 
 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Licensed under the MIT License.

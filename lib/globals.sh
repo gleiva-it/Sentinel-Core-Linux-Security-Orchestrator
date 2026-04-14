@@ -11,7 +11,7 @@ load_config() {
     if [[ -f "$CONFIG_FILE" ]]; then
         source "$CONFIG_FILE"
     else
-        # Valores por defecto si no existe el archivo
+
         LOG_PATH="/var/log/secure"
         AUTH_THRESHOLD=3
         REPORT_DIR="./reports"

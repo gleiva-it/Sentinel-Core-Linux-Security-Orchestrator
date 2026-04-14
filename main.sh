@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# 1. Cargar módulos (Importación)
+# 1. Cargar modulos (Importacion)
 source ./lib/globals.sh
 source ./modules/utils.sh
 source ./modules/logger.sh
 source ./modules/scanner.sh
 source ./modules/monitor.sh
 
-# 2. Verificación de privilegios
+# 2. Verificacion de privilegios
 if [[ $EUID -ne 0 ]]; then
    echo -e "${RED}Error: Ejecutar como root.${NC}"
    exit 1
